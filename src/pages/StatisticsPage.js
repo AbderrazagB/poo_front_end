@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Spinner, Alert } from 'react-bootstrap';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement } from 'chart.js';
 import { FaUsers, FaBook, FaUserGraduate, FaUserTie, FaChartLine } from 'react-icons/fa';
 import api from '../api'; // Assuming you're using axios setup like in DomainsPage
