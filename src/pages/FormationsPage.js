@@ -7,15 +7,14 @@ const initialForm = {
   id: null,
   title: '',
   domainId: '',
-  structureId: '',
-  startDate: '',
-  endDate: '',
+  durationInDays: '',
+  budget: '',
+  year: '',
 };
 
 const FormationsPage = () => {
   const [formations, setFormations] = useState([]);
   const [domains, setDomains] = useState([]);
-  const [structures, setStructures] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -43,17 +42,9 @@ const FormationsPage = () => {
     } catch {}
   };
 
-  const fetchStructures = async () => {
-    try {
-      const res = await api.get('/structures/v1/manager');
-      setStructures(res.data);
-    } catch {}
-  };
-
   useEffect(() => {
     fetchFormations();
     fetchDomains();
-    fetchStructures();
   }, []);
 
   const handleShowCreate = () => {
@@ -67,9 +58,9 @@ const FormationsPage = () => {
       id: f.id,
       title: f.title,
       domainId: f.domain?.id || '',
-      structureId: f.structure?.id || '',
-      startDate: f.startDate,
-      endDate: f.endDate,
+      durationInDays: f.durationInDays || '',
+      budget: f.budget || '',
+      year: f.year || '',
     });
     setIsEdit(true);
     setShowModal(true);
@@ -87,7 +78,7 @@ const FormationsPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const parsedValue = ['domainId', 'structureId'].includes(name) ? Number(value) : value;
+    const parsedValue = ['domainId', 'durationInDays', 'budget', 'year'].includes(name) ? Number(value) : value;
     setForm({ ...form, [name]: parsedValue });
   };
 
@@ -98,9 +89,9 @@ const FormationsPage = () => {
       const payload = {
         title: form.title,
         domainId: form.domainId,
-        structureId: form.structureId,
-        startDate: form.startDate,
-        endDate: form.endDate,
+        durationInDays: form.durationInDays,
+        budget: form.budget,
+        year: form.year,
       };
 
       if (isEdit && form.id != null) {
@@ -135,9 +126,9 @@ const FormationsPage = () => {
                   <th>ID</th>
                   <th>Title</th>
                   <th>Domain</th>
-                  <th>Structure</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
+                  <th>Duration (days)</th>
+                  <th>Budget</th>
+                  <th>Year</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -147,9 +138,9 @@ const FormationsPage = () => {
                     <td>{f.id}</td>
                     <td>{f.title}</td>
                     <td>{f.domain?.label}</td>
-                    <td>{f.structure?.label}</td>
-                    <td>{f.startDate}</td>
-                    <td>{f.endDate}</td>
+                    <td>{f.durationInDays}</td>
+                    <td>{f.budget}</td>
+                    <td>{f.year}</td>
                     <td>
                       <Button
                         size="sm"
@@ -193,19 +184,16 @@ const FormationsPage = () => {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Structure</Form.Label>
-                <Form.Select name="structureId" value={form.structureId} onChange={handleChange} required>
-                  <option value="">Select Structure</option>
-                  {structures.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                </Form.Select>
+                <Form.Label>Duration (days)</Form.Label>
+                <Form.Control name="durationInDays" type="number" value={form.durationInDays} onChange={handleChange} required />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Start Date</Form.Label>
-                <Form.Control name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
+                <Form.Label>Budget</Form.Label>
+                <Form.Control name="budget" type="number" value={form.budget} onChange={handleChange} required />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>End Date</Form.Label>
-                <Form.Control name="endDate" type="date" value={form.endDate} onChange={handleChange} required />
+                <Form.Label>Year</Form.Label>
+                <Form.Control name="year" type="number" value={form.year} onChange={handleChange} required />
               </Form.Group>
             </Modal.Body>
             <Modal.Footer>

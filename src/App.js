@@ -78,10 +78,16 @@ function App() {
 
   return (
     <div className="app-root">
+      {/* Global animated background: 8 circles for all pages */}
       <div className="animated-bg">
-        <div className="bg-anim-circle circle1"></div>
-        <div className="bg-anim-circle circle2"></div>
-        <div className="bg-anim-circle circle3"></div>
+        <div className="bg-anim-circle circle1" />
+        <div className="bg-anim-circle circle2" />
+        <div className="bg-anim-circle circle3" />
+        <div className="bg-anim-circle circle4" />
+        <div className="bg-anim-circle circle5" />
+        <div className="bg-anim-circle circle6" />
+        <div className="bg-anim-circle circle7" />
+        <div className="bg-anim-circle circle8" />
       </div>
       <Navbar bg="primary" variant="dark" expand="lg" sticky="top" className="shadow-sm">
         <Container>
