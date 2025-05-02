@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Alert, Spinner } from 'react-bootstrap';
 import api from '../api';
+import { useSelector } from 'react-redux';
 
 const initialForm = {
   id: null,
@@ -25,6 +26,7 @@ const ParticipantsPage = () => {
   const [saving, setSaving] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [formError, setFormError] = useState('');
+  const { role } = useSelector(state => state.auth);
 
   const fetchParticipants = async () => {
     setLoading(true);
@@ -156,97 +158,123 @@ const ParticipantsPage = () => {
   };
 
   return (
-    <div>
-      <h2>Participants</h2>
-      <Button className="mb-3" onClick={handleShowCreate}>Add Participant</Button>
-      {error && <Alert variant="danger">{error}</Alert>}
-      {loading ? <Spinner animation="border" /> : (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Structure</th>
-              <th>Profile</th>
-              <th>Course</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {participants.map(p => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.firstName}</td>
-                <td>{p.lastName}</td>
-                <td>{p.email}</td>
-                <td>{p.phone}</td>
-                <td>{p.structure?.label}</td>
-                <td>{p.profile?.label}</td>
-                <td>{p.course?.title}</td>
-                <td>
-                  <Button size="sm" variant="info" onClick={() => handleShowEdit(p)} className="me-2">Edit</Button>
-                  <Button size="sm" variant="danger" onClick={() => handleDelete(p.id)}>Delete</Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? 'Edit' : 'Add'} Participant</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            {formError && <Alert variant="danger">{formError}</Alert>}
-            <Form.Group className="mb-3">
-              <Form.Label>First Name</Form.Label>
-              <Form.Control name="firstName" value={form.firstName} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Last Name</Form.Label>
-              <Form.Control name="lastName" value={form.lastName} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control name="email" type="email" value={form.email} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Phone</Form.Label>
-              <Form.Control name="phone" value={form.phone} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Structure</Form.Label>
-              <Form.Select name="structureId" value={form.structureId} onChange={handleChange} required>
-                <option value="">Select Structure</option>
-                {structures.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Profile</Form.Label>
-              <Form.Select name="profileId" value={form.profileId} onChange={handleChange} required>
-                <option value="">Select Profile</option>
-                {profiles.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Course</Form.Label>
-              <Form.Select name="courseId" value={form.courseId} onChange={handleChange} required>
-                <option value="">Select Course</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button variant="primary" type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+    <div className="table-section">
+      <div className="shadow-lg border-0 table-container">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2 className="mb-0">Participants</h2>
+          <Button variant="primary" className="mb-3" onClick={handleShowCreate} disabled={role === 'MANAGER'}>
+            Add Participant
+          </Button>
+        </div>
+        {error && <Alert variant="danger">{error}</Alert>}
+        {loading ? <Spinner animation="border" /> : (
+          <div className="table-responsive">
+            <Table className="elegant-table align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Structure</th>
+                  <th>Profile</th>
+                  <th>Course</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {participants.map(p => (
+                  <tr key={p.id}>
+                    <td>{p.id}</td>
+                    <td>{p.firstName}</td>
+                    <td>{p.lastName}</td>
+                    <td>{p.email}</td>
+                    <td>{p.phone}</td>
+                    <td>{p.structure?.label}</td>
+                    <td>{p.profile?.label}</td>
+                    <td>{p.course?.title}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleShowEdit(p)}
+                        className="me-2"
+                        disabled={role === 'MANAGER'}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDelete(p.id)}
+                        disabled={role === 'MANAGER'}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{isEdit ? 'Edit' : 'Add'} Participant</Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleSubmit}>
+            <Modal.Body>
+              {formError && <Alert variant="danger">{formError}</Alert>}
+              <Form.Group className="mb-3">
+                <Form.Label>First Name</Form.Label>
+                <Form.Control name="firstName" value={form.firstName} onChange={handleChange} required />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Last Name</Form.Label>
+                <Form.Control name="lastName" value={form.lastName} onChange={handleChange} required />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control name="email" type="email" value={form.email} onChange={handleChange} required />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Phone</Form.Label>
+                <Form.Control name="phone" value={form.phone} onChange={handleChange} required />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Structure</Form.Label>
+                <Form.Select name="structureId" value={form.structureId} onChange={handleChange} required>
+                  <option value="">Select Structure</option>
+                  {structures.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Profile</Form.Label>
+                <Form.Select name="profileId" value={form.profileId} onChange={handleChange} required>
+                  <option value="">Select Profile</option>
+                  {profiles.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Course</Form.Label>
+                <Form.Select name="courseId" value={form.courseId} onChange={handleChange} required>
+                  <option value="">Select Course</option>
+                  {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </Form.Select>
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal(false)} disabled={role === 'MANAGER'}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit" disabled={saving || role === 'MANAGER'}>
+                {saving ? 'Saving...' : 'Save'}
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
+      </div>
     </div>
   );
 };

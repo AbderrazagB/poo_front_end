@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Alert, Spinner } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Spinner, Card } from 'react-bootstrap';
 import api from '../api';
+import { motion } from 'framer-motion';
+import { useSelector } from 'react-redux';
 
 const initialForm = {
   id: null,
@@ -21,6 +23,7 @@ const FormateursPage = () => {
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const { role } = useSelector(state => state.auth);
 
   const fetchFormateurs = async () => {
     setLoading(true);
@@ -69,6 +72,7 @@ const FormateursPage = () => {
   };
 
   const handleDelete = async (id) => {
+    if (role === 'MANAGER') return;
     if (!window.confirm('Are you sure you want to delete this formateur?')) return;
     try {
       await api.delete(`/instructors/v1/manager/delete/${id}`);
@@ -120,143 +124,164 @@ const FormateursPage = () => {
   };
 
   return (
-    <div>
-      <h2>Formateurs</h2>
-      <Button className="mb-3" onClick={handleShowCreate}>
-        Add Formateur
-      </Button>
-      {error && <Alert variant="danger">{error}</Alert>}
-      {loading ? (
-        <Spinner animation="border" />
-      ) : (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Type</th>
-              <th>Employer</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {formateurs.map((f) => (
-              <tr key={f.id}>
-                <td>{f.id}</td>
-                <td>{f.firstName}</td>
-                <td>{f.lastName}</td>
-                <td>{f.email}</td>
-                <td>{f.phone}</td>
-                <td>{f.type}</td>
-                <td>{f.employer?.name}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="info"
-                    onClick={() => handleShowEdit(f)}
-                    className="me-2"
+    <div className="table-section">
+      <Card className="shadow-lg border-0 table-container mx-auto" style={{maxWidth: 1200, marginTop: 40}}>
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <h4 className="mb-0">Formateurs</h4>
+          <Button 
+            variant="primary" 
+            onClick={handleShowCreate} 
+            className="add-btn"
+            disabled={role === 'MANAGER'}
+          >
+            Add Formateur
+          </Button>
+        </Card.Header>
+        <Card.Body>
+          {error && <Alert variant="danger">{error}</Alert>}
+          {loading ? (
+            <Spinner animation="border" />
+          ) : (
+            <div className="table-responsive">
+              <Table className="elegant-table align-middle">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Type</th>
+                    <th>Employer</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formateurs.map((f) => (
+                    <tr key={f.id}>
+                      <td>{f.id}</td>
+                      <td>{f.firstName}</td>
+                      <td>{f.lastName}</td>
+                      <td>{f.email}</td>
+                      <td>{f.phone}</td>
+                      <td>{f.type}</td>
+                      <td>{f.employer?.name}</td>
+                      <td>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleShowEdit(f)}
+                          className="me-2"
+                          disabled={role === 'MANAGER'}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={() => handleDelete(f.id)}
+                          disabled={role === 'MANAGER'}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          )}
+          <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>{isEdit ? 'Edit' : 'Add'} Formateur</Modal.Title>
+            </Modal.Header>
+            <Form onSubmit={handleSubmit}>
+              <Modal.Body>
+                <Form.Group className="mb-3">
+                  <Form.Label>First Name</Form.Label>
+                  <Form.Control
+                    name="firstName"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    required
+                    disabled={role === 'MANAGER'}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Last Name</Form.Label>
+                  <Form.Control
+                    name="lastName"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    required
+                    disabled={role === 'MANAGER'}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    disabled={role === 'MANAGER'}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Phone</Form.Label>
+                  <Form.Control
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    required
+                    disabled={role === 'MANAGER'}
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Type</Form.Label>
+                  <Form.Select
+                    name="type"
+                    value={form.type}
+                    onChange={handleChange}
+                    required
+                    disabled={role === 'MANAGER'}
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => handleDelete(f.id)}
+                    <option value="">Select Type</option>
+                    <option value="INTERNAL">INTERNAL</option>
+                    <option value="EXTERNAL">EXTERNAL</option>
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Employer</Form.Label>
+                  <Form.Select
+                    name="employerId"
+                    value={form.employerId}
+                    onChange={handleChange}
+                    required
+                    disabled={role === 'MANAGER'}
                   >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? 'Edit' : 'Add'} Formateur</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>First Name</Form.Label>
-              <Form.Control
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Last Name</Form.Label>
-              <Form.Control
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Phone</Form.Label>
-              <Form.Control
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Type</Form.Label>
-              <Form.Select
-                name="type"
-                value={form.type}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Type</option>
-                <option value="INTERNAL">INTERNAL</option>
-                <option value="EXTERNAL">EXTERNAL</option>
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Employer</Form.Label>
-              <Form.Select
-                name="employerId"
-                value={form.employerId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Employer</option>
-                {employers.map((employer) => (
-                  <option key={employer.id} value={employer.id}>
-                    {employer.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+                    <option value="">Select Employer</option>
+                    {employers.map((employer) => (
+                      <option key={employer.id} value={employer.id}>
+                        {employer.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)} disabled={role === 'MANAGER'}>
+                  Cancel
+                </Button>
+                <Button variant="primary" type="submit" disabled={saving || role === 'MANAGER'}>
+                  {saving ? 'Saving...' : 'Save'}
+                </Button>
+              </Modal.Footer>
+            </Form>
+          </Modal>
+        </Card.Body>
+      </Card>
     </div>
   );
 };

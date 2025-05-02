@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Alert, Spinner } from 'react-bootstrap';
 import api from '../api';
+import { useSelector } from 'react-redux';
 
 const initialForm = {
   id: null,
   title: '',
-  year: '',
-  budget: '',
-  durationInDays: '',
   domainId: '',
+  structureId: '',
+  startDate: '',
+  endDate: '',
 };
 
 const FormationsPage = () => {
   const [formations, setFormations] = useState([]);
   const [domains, setDomains] = useState([]);
+  const [structures, setStructures] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const { role } = useSelector(state => state.auth);
 
   const fetchFormations = async () => {
     setLoading(true);
@@ -40,9 +43,17 @@ const FormationsPage = () => {
     } catch {}
   };
 
+  const fetchStructures = async () => {
+    try {
+      const res = await api.get('/structures/v1/manager');
+      setStructures(res.data);
+    } catch {}
+  };
+
   useEffect(() => {
     fetchFormations();
     fetchDomains();
+    fetchStructures();
   }, []);
 
   const handleShowCreate = () => {
@@ -55,10 +66,10 @@ const FormationsPage = () => {
     setForm({
       id: f.id,
       title: f.title,
-      year: f.year,
-      budget: f.budget,
-      durationInDays: f.durationInDays,
       domainId: f.domain?.id || '',
+      structureId: f.structure?.id || '',
+      startDate: f.startDate,
+      endDate: f.endDate,
     });
     setIsEdit(true);
     setShowModal(true);
@@ -76,7 +87,7 @@ const FormationsPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const parsedValue = ['domainId'].includes(name) ? Number(value) : value;
+    const parsedValue = ['domainId', 'structureId'].includes(name) ? Number(value) : value;
     setForm({ ...form, [name]: parsedValue });
   };
 
@@ -86,10 +97,10 @@ const FormationsPage = () => {
     try {
       const payload = {
         title: form.title,
-        year: Number(form.year),
-        budget: Number(form.budget),
-        durationInDays: Number(form.durationInDays),
         domainId: form.domainId,
+        structureId: form.structureId,
+        startDate: form.startDate,
+        endDate: form.endDate,
       };
 
       if (isEdit && form.id != null) {
@@ -107,79 +118,107 @@ const FormationsPage = () => {
   };
 
   return (
-    <div>
-      <h2>Formations</h2>
-      <Button className="mb-3" onClick={handleShowCreate}>Add Formation</Button>
-      {error && <Alert variant="danger">{error}</Alert>}
-      {loading ? <Spinner animation="border" /> : (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Year</th>
-              <th>Budget</th>
-              <th>Duration (days)</th>
-              <th>Domain</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {formations.map(f => (
-              <tr key={f.id}>
-                <td>{f.id}</td>
-                <td>{f.title}</td>
-                <td>{f.year}</td>
-                <td>{f.budget}</td>
-                <td>{f.durationInDays}</td>
-                <td>{f.domain?.label}</td>
-                <td>
-                  <Button size="sm" variant="info" onClick={() => handleShowEdit(f)} className="me-2">Edit</Button>
-                  <Button size="sm" variant="danger" onClick={() => handleDelete(f.id)}>Delete</Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{isEdit ? 'Edit' : 'Add'} Formation</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Title</Form.Label>
-              <Form.Control name="title" value={form.title} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Year</Form.Label>
-              <Form.Control name="year" type="number" value={form.year} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Budget</Form.Label>
-              <Form.Control name="budget" type="number" value={form.budget} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Duration (days)</Form.Label>
-              <Form.Control name="durationInDays" type="number" value={form.durationInDays} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Domain</Form.Label>
-              <Form.Select name="domainId" value={form.domainId} onChange={handleChange} required>
-                <option value="">Select Domain</option>
-                {domains.map(d => (
-                  <option key={d.id} value={d.id}>{d.label}</option>
+    <div className="table-section">
+      <div className="shadow-lg border-0 table-container">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2 className="mb-0">Formations</h2>
+          <Button variant="primary" className="mb-3" onClick={handleShowCreate} disabled={role === 'MANAGER'}>
+            Add Formation
+          </Button>
+        </div>
+        {error && <Alert variant="danger">{error}</Alert>}
+        {loading ? <Spinner animation="border" /> : (
+          <div className="table-responsive">
+            <Table className="elegant-table align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Domain</th>
+                  <th>Structure</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {formations.map(f => (
+                  <tr key={f.id}>
+                    <td>{f.id}</td>
+                    <td>{f.title}</td>
+                    <td>{f.domain?.label}</td>
+                    <td>{f.structure?.label}</td>
+                    <td>{f.startDate}</td>
+                    <td>{f.endDate}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleShowEdit(f)}
+                        className="me-2"
+                        disabled={role === 'MANAGER'}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDelete(f.id)}
+                        disabled={role === 'MANAGER'}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
                 ))}
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button variant="primary" type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+              </tbody>
+            </Table>
+          </div>
+        )}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{isEdit ? 'Edit' : 'Add'} Formation</Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleSubmit}>
+            <Modal.Body>
+              <Form.Group className="mb-3">
+                <Form.Label>Title</Form.Label>
+                <Form.Control name="title" value={form.title} onChange={handleChange} required />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Domain</Form.Label>
+                <Form.Select name="domainId" value={form.domainId} onChange={handleChange} required>
+                  <option value="">Select Domain</option>
+                  {domains.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Structure</Form.Label>
+                <Form.Select name="structureId" value={form.structureId} onChange={handleChange} required>
+                  <option value="">Select Structure</option>
+                  {structures.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Start Date</Form.Label>
+                <Form.Control name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>End Date</Form.Label>
+                <Form.Control name="endDate" type="date" value={form.endDate} onChange={handleChange} required />
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal(false)} disabled={role === 'MANAGER'}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit" disabled={saving || role === 'MANAGER'}>
+                {saving ? 'Saving...' : 'Save'}
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
+      </div>
     </div>
   );
 };
