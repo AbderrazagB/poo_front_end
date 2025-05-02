@@ -53,6 +53,16 @@ h2, h3, h4, h5, h6 {
   margin-bottom: 0.5em;
 }
 
+/* Big page titles */
+.page-title {
+  color: var(--primary-color);
+  font-size: 2.3rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  margin-bottom: 1.7rem;
+  text-shadow: 0 2px 8px rgba(6,182,212,0.07);
+}
+
 /* Navbar */
 .navbar {
   background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
@@ -169,11 +179,22 @@ h2, h3, h4, h5, h6 {
   font-size: 1.04rem;
   border: none;
 }
+/* Table header styling for better contrast */
 .table th {
   background: #e5e7eb05;
   color: var(--primary-color);
   font-weight: 700;
   border-bottom: 2px solid #d1d5db;
+  font-size: 1.09rem;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+/* Optional: Table header cell border radius */
+.table thead th:first-child {
+  border-top-left-radius: 12px;
+}
+.table thead th:last-child {
+  border-top-right-radius: 12px;
 }
 .table tbody tr {
   background: #fff;
@@ -501,6 +522,9 @@ h2, h3, h4, h5, h6 {
 }
 .shadow-sm {
   box-shadow: 0 2px 8px 0 rgba(99,102,241,0.08) !important;
+}
+.text-accent {
+  color: var(--primary-color) !important;
 }
 
 /* Landing Page Modern Hero Section */

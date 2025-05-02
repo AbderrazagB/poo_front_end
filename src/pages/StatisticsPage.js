@@ -58,7 +58,7 @@ const StatisticsPage = () => {
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div className="d-flex align-items-center gap-3">
             <FaChartLine size={32} className="text-primary" />
-            <h2 className="mb-0">Statistics Dashboard</h2>
+            <h2 className="page-title mb-0">Statistics Dashboard</h2>
           </div>
         </div>
         {error && <Alert variant="danger">{error}</Alert>}

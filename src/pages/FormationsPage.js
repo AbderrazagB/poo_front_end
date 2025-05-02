@@ -112,7 +112,7 @@ const FormationsPage = () => {
     <div className="table-section">
       <div className="shadow-lg border-0 table-container">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="mb-0">Formations</h2>
+          <h2 className="page-title mb-0">Formations</h2>
           <Button variant="primary" className="mb-3" onClick={handleShowCreate} disabled={role === 'MANAGER'}>
             Add Formation
           </Button>
@@ -123,13 +123,13 @@ const FormationsPage = () => {
             <Table className="elegant-table align-middle">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Domain</th>
-                  <th>Duration (days)</th>
-                  <th>Budget</th>
-                  <th>Year</th>
-                  <th>Actions</th>
+                  <th className="text-accent">ID</th>
+                  <th className="text-accent">Title</th>
+                  <th className="text-accent">Domain</th>
+                  <th className="text-accent">Duration (days)</th>
+                  <th className="text-accent">Budget</th>
+                  <th className="text-accent">Year</th>
+                  <th className="text-accent">Actions</th>
                 </tr>
               </thead>
               <tbody>
