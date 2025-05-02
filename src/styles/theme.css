@@ -147,7 +147,7 @@ h2, h3, h4, h5, h6 {
 .table, .card, .modal-content, .table-section, .table-container, .elegant-table {
   background-color: #fff !important;
   backdrop-filter: none !important;
-  opacity: 1 !important;
+  opacity: 0.95 !important;
 }
 
 .table-container {
